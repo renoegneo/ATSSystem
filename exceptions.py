@@ -52,8 +52,6 @@ ERROR_MESSAGES = {
 def _format_validation_errors(errors: list) -> list[dict]:
     result = []
     for err in errors:
-        # loc is a tuple like ("body", "parts", 0, "price")
-        # we take the last meaningful part as field name
         loc = [str(l) for l in err["loc"] if l not in ("body", "query", "path")]
         raw_field = loc[-1] if loc else ""
         field = FIELD_NAMES.get(raw_field, raw_field) if raw_field else ""
