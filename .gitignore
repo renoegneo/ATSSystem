@@ -1,0 +1,42 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual environment
+.venv/
+
+# SQLite database
+autoservice.db
+*.db
+*.sqlite3
+
+# IDEs and editors
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Logs and temporary files
+*.log
+*.tmp
+*.bak
+
+# Environment files
+.env
+.env.*
+
+# Python packaging
+dist/
+build/
+*.egg-info/
+
+# Static file caches
+static/__pycache__/
+
+# backups and old versions
+backups/
