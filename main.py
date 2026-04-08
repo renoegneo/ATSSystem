@@ -15,6 +15,9 @@ from config import SESSION_SECRET, SESSION_MAX_AGE, HOST, PORT
 DEV_MODE = os.getenv("DEV", "0") == "1"
 
 
+# APP DOESNT WORK YET
+
+
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     # runs once on startup before accepting requests
