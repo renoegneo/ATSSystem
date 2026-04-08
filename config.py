@@ -32,6 +32,6 @@ def verify_password(plain: str, hashed: str) -> bool:
 # Run this once in terminal to generate a hash:
 #   python -c "from config import hash_password; print(hash_password('yourpassword'))"
 
-USER_PASSWORD_HASH  = hash_password("1234")   # change before deploy
+USER_PASSWORD_HASH  = hash_password("1234")  # change before deploy
 ADMIN_LOGIN         = "admin"
 ADMIN_PASSWORD_HASH = hash_password("admin") # change before deploy
