@@ -11,8 +11,8 @@ from exceptions import register_exception_handlers
 from routers import acts, auth, admin
 from config import SESSION_SECRET, SESSION_MAX_AGE, HOST, PORT
 
-# DEV_MODE = os.getenv("DEV", "0") == "1"
-DEV_MODE = True  # for development, set to False in production
+DEV_MODE = os.getenv("DEV", "0") == "1"
+# DEV_MODE = True  # for development, set to False in production
 
 
 @asynccontextmanager
