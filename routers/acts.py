@@ -15,8 +15,7 @@ templates = Jinja2Templates(directory=Path(__file__).parent.parent / "templates"
 @router.get("", response_class=HTMLResponse)
 async def acts_list(request: Request, q: str = ""):
     acts = crud.search_acts(q) if q else crud.get_all_acts()
-    return templates.TemplateResponse("acts/list.html", {
-        "request": request,
+    return templates.TemplateResponse(request, "acts/list.html", {
         "acts": acts,
         "query": q,
     })
@@ -24,7 +23,7 @@ async def acts_list(request: Request, q: str = ""):
 
 @router.get("/new", response_class=HTMLResponse)
 async def act_new_page(request: Request):
-    return templates.TemplateResponse("acts/new.html", {"request": request})
+    return templates.TemplateResponse(request, "acts/new.html", {})
 
 
 @router.get("/{act_id}", response_class=HTMLResponse)
@@ -32,10 +31,7 @@ async def act_detail(request: Request, act_id: int):
     act = crud.get_act(act_id)
     if act is None:
         raise NotFoundError("Акт не найден")
-    return templates.TemplateResponse("acts/detail.html", {
-        "request": request,
-        "act": act,
-    })
+    return templates.TemplateResponse(request, "acts/detail.html", {"act": act})
 
 
 @router.get("/{act_id}/edit", response_class=HTMLResponse)
@@ -43,10 +39,7 @@ async def act_edit_page(request: Request, act_id: int):
     act = crud.get_act(act_id)
     if act is None:
         raise NotFoundError("Акт не найден")
-    return templates.TemplateResponse("acts/edit.html", {
-        "request": request,
-        "act": act,
-    })
+    return templates.TemplateResponse(request, "acts/edit.html", {"act": act})
 
 
 # --- export placeholder (v2) ----------------------------------------------

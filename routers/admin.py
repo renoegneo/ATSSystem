@@ -3,8 +3,8 @@ from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse
 from fastapi.templating import Jinja2Templates
 from pathlib import Path
 from models import ChangePasswordIn
-from exceptions import NotFoundError, ForbiddenError
-from config import verify_password, hash_password, USER_PASSWORD_HASH
+from exceptions import NotFoundError
+from config import verify_password, hash_password
 import crud
 import config
 
@@ -17,17 +17,13 @@ templates = Jinja2Templates(directory=Path(__file__).parent.parent / "templates"
 @router.get("", response_class=HTMLResponse)
 async def admin_dashboard(request: Request):
     stats = crud.get_stats("month")
-    return templates.TemplateResponse("admin/dashboard.html", {
-        "request": request,
-        "stats": stats,
-    })
+    return templates.TemplateResponse(request, "admin/dashboard.html", {"stats": stats})
 
 
 @router.get("/acts", response_class=HTMLResponse)
 async def admin_acts(request: Request, q: str = ""):
     acts = crud.search_acts(q) if q else crud.get_all_acts(limit=500)
-    return templates.TemplateResponse("admin/acts.html", {
-        "request": request,
+    return templates.TemplateResponse(request, "admin/acts.html", {
         "acts": acts,
         "query": q,
     })
@@ -36,8 +32,7 @@ async def admin_acts(request: Request, q: str = ""):
 @router.get("/stats", response_class=HTMLResponse)
 async def admin_stats(request: Request, period: str = "month"):
     stats = crud.get_stats(period)
-    return templates.TemplateResponse("admin/stats.html", {
-        "request": request,
+    return templates.TemplateResponse(request, "admin/stats.html", {
         "stats": stats,
         "period": period,
     })
@@ -46,16 +41,12 @@ async def admin_stats(request: Request, period: str = "month"):
 @router.get("/audit", response_class=HTMLResponse)
 async def admin_audit(request: Request):
     log = crud.get_audit_log()
-    return templates.TemplateResponse("admin/audit.html", {
-        "request": request,
-        "log": log,
-    })
+    return templates.TemplateResponse(request, "admin/audit.html", {"log": log})
 
 
 @router.get("/settings", response_class=HTMLResponse)
 async def admin_settings(request: Request):
-    return templates.TemplateResponse("admin/settings.html", {
-        "request": request,
+    return templates.TemplateResponse(request, "admin/settings.html", {
         "success": None,
         "error": None,
     })
@@ -78,14 +69,10 @@ async def admin_stats_api(period: str = "month"):
 
 @router.post("/api/change-password", response_class=JSONResponse)
 async def admin_change_user_password(data: ChangePasswordIn):
-    # verify current user password before changing
     if not verify_password(data.old_password, config.USER_PASSWORD_HASH):
         return JSONResponse(
             status_code=400,
             content={"ok": False, "errors": [{"field": "Старый пароль", "message": "Неверный пароль"}]},
         )
-
-    # update the hash in memory (persists until server restart)
-    # for permanent change — update USER_PASSWORD_HASH in config.py manually
     config.USER_PASSWORD_HASH = hash_password(data.new_password)
     return {"ok": True, "message": "Пароль успешно изменён"}

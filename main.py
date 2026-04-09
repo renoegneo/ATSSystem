@@ -15,9 +15,6 @@ from config import SESSION_SECRET, SESSION_MAX_AGE, HOST, PORT
 DEV_MODE = os.getenv("DEV", "0") == "1"
 
 
-# APP DOESNT WORK YET
-
-
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     # runs once on startup before accepting requests
@@ -33,7 +30,10 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
-# --- middleware (order matters: sessions must come before auth) ------------
+# --- middleware ---------------------------------------------------------------
+# add_middleware wraps in reverse order, so last added runs first.
+# We want: AuthMiddleware runs first (checks session) → SessionMiddleware runs second (provides session).
+# So we add SessionMiddleware first, AuthMiddleware second.
 app.add_middleware(SessionMiddleware, secret_key=SESSION_SECRET, max_age=SESSION_MAX_AGE)
 app.add_middleware(AuthMiddleware)
 
