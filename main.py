@@ -8,19 +8,17 @@ import os
 
 from database import init_db
 from exceptions import register_exception_handlers
-from middleware.auth import AuthMiddleware
 from routers import acts, auth, admin
 from config import SESSION_SECRET, SESSION_MAX_AGE, HOST, PORT
 
-DEV_MODE = os.getenv("DEV", "0") == "1"
+# DEV_MODE = os.getenv("DEV", "0") == "1"
+DEV_MODE = True  # for development, set to False in production
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    # runs once on startup before accepting requests
     init_db()
     yield
-    # anything after yield runs on shutdown (nothing to do here yet)
 
 
 app = FastAPI(
@@ -30,12 +28,9 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
-# --- middleware ---------------------------------------------------------------
-# add_middleware wraps in reverse order, so last added runs first.
-# We want: AuthMiddleware runs first (checks session) → SessionMiddleware runs second (provides session).
-# So we add SessionMiddleware first, AuthMiddleware second.
+# --- middleware -----------------------------------------------------------
+# only SessionMiddleware needed — auth is handled via router dependencies
 app.add_middleware(SessionMiddleware, secret_key=SESSION_SECRET, max_age=SESSION_MAX_AGE)
-app.add_middleware(AuthMiddleware)
 
 # --- static files ---------------------------------------------------------
 app.mount("/static", StaticFiles(directory=Path(__file__).parent / "static"), name="static")

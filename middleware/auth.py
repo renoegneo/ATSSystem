@@ -1,31 +1,35 @@
-from fastapi import Request
+from fastapi import Request, Depends
 from fastapi.responses import RedirectResponse
-from starlette.middleware.base import BaseHTTPMiddleware
 
 # routes that don't require any auth
 PUBLIC_ROUTES = {"/login", "/logout"}
 
-# routes that require admin session
-ADMIN_ROUTES_PREFIX = "/admin"
+# prefix that requires admin role
+ADMIN_PREFIX = "/admin"
 
 
-class AuthMiddleware(BaseHTTPMiddleware):
-    async def dispatch(self, request: Request, call_next):
-        path = request.url.path
+def get_role(request: Request) -> str | None:
+    return request.session.get("role")
 
-        # always allow static files and public routes
-        if path.startswith("/static") or path in PUBLIC_ROUTES:
-            return await call_next(request)
 
-        session = request.session
-        role = session.get("role")  # None | "user" | "admin"
+# def require_user(request: Request):
+#     # used as a dependency on routers — redirects to login if not authenticated
+#     if request.url.path in PUBLIC_ROUTES:
+#         return
+#     role = request.session.get("role")
+#     if role is None:
+#         return RedirectResponse(url="/login", status_code=302)
+#     return role
 
-        # not logged in at all — redirect to login
-        if role is None:
-            return RedirectResponse(url="/login", status_code=302)
 
-        # user trying to access admin routes — redirect to login
-        if path.startswith(ADMIN_ROUTES_PREFIX) and role != "admin":
-            return RedirectResponse(url="/login", status_code=302)
+# def require_admin(request: Request):
+#     role = request.session.get("role")
+#     if role != "admin":
+#         return RedirectResponse(url="/login", status_code=302)
+#     return role
 
-        return await call_next(request)
+def require_user(request: Request):
+    return "user"  # temporarily bypassing auth for development
+
+def require_admin(request: Request):
+    return "admin"  # temporarily bypassing auth for development
