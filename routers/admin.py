@@ -4,9 +4,9 @@ from fastapi.templating import Jinja2Templates
 from pathlib import Path
 from models import ChangePasswordIn
 from exceptions import NotFoundError
-from config import verify_password, hash_password
+from config import verify_password, hash_password, get_user_password_hash
+from database import set_setting
 import crud
-import config
 
 router = APIRouter(prefix="/admin")
 templates = Jinja2Templates(directory=Path(__file__).parent.parent / "templates")
@@ -69,10 +69,11 @@ async def admin_stats_api(period: str = "month"):
 
 @router.post("/api/change-password", response_class=JSONResponse)
 async def admin_change_user_password(data: ChangePasswordIn):
-    if not verify_password(data.old_password, config.USER_PASSWORD_HASH):
+    if not verify_password(data.old_password, get_user_password_hash()):
         return JSONResponse(
             status_code=400,
             content={"ok": False, "errors": [{"field": "Старый пароль", "message": "Неверный пароль"}]},
         )
-    config.USER_PASSWORD_HASH = hash_password(data.new_password)
+    # write new hash to DB — persists across server restarts
+    set_setting("user_password_hash", hash_password(data.new_password))
     return {"ok": True, "message": "Пароль успешно изменён"}

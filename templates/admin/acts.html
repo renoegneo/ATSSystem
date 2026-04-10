@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+{% block title %}Все акты — Админ{% endblock %}
+{% block page_title %}Все акты{% endblock %}
+{% block topbar_actions %}
+<div class="search-bar">
+  <i class="bi bi-search search-icon"></i>
+  <input type="text" class="form-control" id="searchInput" placeholder="Поиск..." value="{{ query }}">
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="card">
+  {% if acts %}
+  <table class="acts-table">
+    <thead><tr>
+      <th>№</th><th>Дата</th><th>Машина</th><th>Водитель</th><th>Сумма</th><th>Действия</th>
+    </tr></thead>
+    <tbody>
+    {% for act in acts %}
+    <tr id="row-{{ act.id }}">
+      <td><span class="badge-id">#{{ act.id }}</span></td>
+      <td>{{ act.act_date }}</td>
+      <td><a href="/acts/{{ act.id }}">{{ act.car_info }}</a></td>
+      <td>{{ act.driver_name or '—' }}</td>
+      <td class="amount-col">{{ "%.2f"|format(act.total_amount) }}</td>
+      <td style="display:flex;gap:6px;">
+        <a href="/acts/{{ act.id }}/edit" class="btn-ghost btn-sm"><i class="bi bi-pencil"></i></a>
+        <button class="btn-danger btn-sm" onclick="confirmDelete({{ act.id }}, '{{ act.car_info }}')">
+          <i class="bi bi-trash"></i>
+        </button>
+      </td>
+    </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  <div class="empty-state">
+    <div class="empty-icon">📋</div>
+    <p>{% if query %}Ничего не найдено{% else %}Актов пока нет{% endif %}</p>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+let searchTimer;
+document.getElementById('searchInput').addEventListener('input', (e) => {
+  clearTimeout(searchTimer);
+  searchTimer = setTimeout(() => {
+    const q = e.target.value.trim();
+    window.location.href = q ? `/admin/acts?q=${encodeURIComponent(q)}` : '/admin/acts';
+  }, 400);
+});
+
+function confirmDelete(id, carInfo) {
+  showConfirm(
+    'Удалить акт?',
+    `Акт #${id} (${carInfo}) будет удалён без возможности восстановления.`,
+    async () => {
+      const { ok, data } = await api('DELETE', `/admin/api/acts/${id}`);
+      if (ok) {
+        document.getElementById(`row-${id}`)?.remove();
+        showToast(`Акт #${id} удалён`);
+      } else {
+        showToast(data?.errors?.[0]?.message || 'Ошибка удаления', 'error');
+      }
+    }
+  );
+}
+</script>
+{% endblock %}

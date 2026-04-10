@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+{% block title %}Статистика{% endblock %}
+{% block page_title %}Статистика{% endblock %}
+{% block topbar_actions %}
+<div style="display:flex;gap:8px;">
+  <a href="?period=day"   class="btn-ghost btn-sm {% if period=='day' %}active{% endif %}">День</a>
+  <a href="?period=month" class="btn-ghost btn-sm {% if period=='month' %}active{% endif %}">Месяц</a>
+  <a href="?period=year"  class="btn-ghost btn-sm {% if period=='year' %}active{% endif %}">Год</a>
+</div>
+{% endblock %}
+
+{% block content %}
+<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:24px;">
+  <div class="stat-card">
+    <div class="stat-label">Всего актов</div>
+    <div class="stat-value">{{ stats.total_acts }}</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-label">Общая выручка</div>
+    <div class="stat-value accent">{{ "%.2f"|format(stats.total_revenue) }}</div>
+  </div>
+  <div class="stat-card">
+    <div class="stat-label">Средний чек</div>
+    <div class="stat-value" style="font-size:20px;">
+      {{ "%.2f"|format(stats.total_revenue / stats.total_acts) if stats.total_acts else '—' }}
+    </div>
+  </div>
+</div>
+
+<div class="card">
+  <div class="card-header"><span class="card-header-title">Выручка по периодам</span></div>
+  <div class="card-body">
+    {% if stats.revenue_by_period %}
+    {% set max_val = stats.revenue_by_period | map(attribute='total') | max %}
+    <div style="display:flex;flex-direction:column;gap:10px;">
+      {% for row in stats.revenue_by_period %}
+      <div style="display:flex;align-items:center;gap:12px;">
+        <span style="font-size:12px;color:var(--text-muted);width:70px;text-align:right;">{{ row.period }}</span>
+        <div style="flex:1;background:var(--bg);border-radius:4px;height:26px;overflow:hidden;">
+          <div style="width:{{ (row.total / max_val * 100)|round }}%;background:var(--accent);height:100%;border-radius:4px;"></div>
+        </div>
+        <span style="font-size:13px;font-weight:600;width:100px;text-align:right;">{{ "%.2f"|format(row.total) }}</span>
+      </div>
+      {% endfor %}
+    </div>
+    {% else %}
+    <p style="text-align:center;color:var(--text-muted);padding:40px 0;">Данных пока нет</p>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

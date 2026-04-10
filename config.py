@@ -8,14 +8,17 @@ DB_PATH  = BASE_DIR / "autoservice.db"
 
 # --- server ---------------------------------------------------------------
 
-HOST = "0.0.0.0"  # listen on all network interfaces, not just localhost
+HOST = "0.0.0.0"
 PORT = 8000
 
 # --- sessions -------------------------------------------------------------
 
-SESSION_SECRET = "change-this-to-a-random-string-before-deploy"
-SESSION_MAX_AGE = 60 * 60   # 1 hour in seconds
+SESSION_SECRET  = "change-this-to-a-random-string-before-deploy"
+SESSION_MAX_AGE = 60 * 60 * 2 # 2 hours in seconds
 
+# --- admin login ----------------------------------------------------------
+# admin login is still in code — only password is in DB
+ADMIN_LOGIN = "admin"
 
 # --- password hashing -----------------------------------------------------
 
@@ -27,11 +30,14 @@ def verify_password(plain: str, hashed: str) -> bool:
     return bcrypt.checkpw(plain.encode(), hashed.encode())
 
 
-# --- credentials ----------------------------------------------------------
-# To change passwords: replace the hash with hash_password("your_new_password")
-# Run this once in terminal to generate a hash:
-#   python -c "from config import hash_password; print(hash_password('yourpassword'))"
+# --- read passwords from DB -----------------------------------------------
+# imported lazily to avoid circular imports at module load time
 
-USER_PASSWORD_HASH  = hash_password("1234")  # change before deploy
-ADMIN_LOGIN         = "admin"
-ADMIN_PASSWORD_HASH = hash_password("admin") # change before deploy
+def get_user_password_hash() -> str:
+    from database import get_setting
+    return get_setting("user_password_hash") or ""
+
+
+def get_admin_password_hash() -> str:
+    from database import get_setting
+    return get_setting("admin_password_hash") or ""

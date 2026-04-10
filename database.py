@@ -1,4 +1,5 @@
 import sqlite3
+import bcrypt
 from pathlib import Path
 
 DB_PATH = Path(__file__).parent / "autoservice.db"
@@ -7,9 +8,13 @@ DB_PATH = Path(__file__).parent / "autoservice.db"
 def get_connection() -> sqlite3.Connection:
     conn = sqlite3.connect(DB_PATH)
     conn.row_factory = sqlite3.Row
-    conn.execute("PRAGMA foreign_keys = ON")  # проверка внешних ключей
-    conn.execute("PRAGMA journal_mode = WAL")  # защита от повреждения базы данных при сбоях
+    conn.execute("PRAGMA foreign_keys = ON")
+    conn.execute("PRAGMA journal_mode = WAL")
     return conn
+
+
+def _default_hash(plain: str) -> str:
+    return bcrypt.hashpw(plain.encode(), bcrypt.gensalt()).decode()
 
 
 def init_db() -> None:
@@ -55,4 +60,34 @@ def init_db() -> None:
                 details    TEXT,
                 created_at TEXT NOT NULL DEFAULT (datetime('now', 'localtime'))
             );
+
+            CREATE TABLE IF NOT EXISTS settings (
+                key   TEXT PRIMARY KEY,
+                value TEXT NOT NULL
+            );
         """)
+
+    # insert default credentials only if they don't exist yet
+    with get_connection() as conn:
+        conn.execute(
+            "INSERT OR IGNORE INTO settings (key, value) VALUES (?, ?)",
+            ("user_password_hash", _default_hash("1234")),
+        )
+        conn.execute(
+            "INSERT OR IGNORE INTO settings (key, value) VALUES (?, ?)",
+            ("admin_password_hash", _default_hash("admin")),
+        )
+
+
+def get_setting(key: str) -> str | None:
+    with get_connection() as conn:
+        row = conn.execute("SELECT value FROM settings WHERE key = ?", (key,)).fetchone()
+        return row["value"] if row else None
+
+
+def set_setting(key: str, value: str) -> None:
+    with get_connection() as conn:
+        conn.execute(
+            "INSERT OR REPLACE INTO settings (key, value) VALUES (?, ?)",
+            (key, value),
+        )

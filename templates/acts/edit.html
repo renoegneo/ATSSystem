@@ -103,11 +103,11 @@
 {% endblock %}
 
 {% block scripts %}
-<script src="/static/js/act-form.js"></script>
+<script src="/static/js/act-form.js?v=2"></script>
 <script>
   const ACT_ID = {{ act.id }};
-  const existingParts = {{ act.parts | tojson }};
-  const existingWorks = {{ act.works | tojson }};
+  const existingParts = {{ parts_json | tojson }};
+  const existingWorks = {{ works_json | tojson }};
 
   // fill existing rows — no draft on edit page
   if (existingParts.length) existingParts.forEach(r => addRow('parts', r));

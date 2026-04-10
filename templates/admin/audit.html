@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% block title %}Журнал действий{% endblock %}
+{% block page_title %}Журнал действий{% endblock %}
+
+{% block content %}
+<div class="card">
+  {% if log %}
+  <table class="acts-table">
+    <thead><tr>
+      <th>Дата и время</th><th>Действие</th><th>Объект</th><th>ID</th><th>Детали</th>
+    </tr></thead>
+    <tbody>
+    {% for entry in log %}
+    <tr>
+      <td style="color:var(--text-muted);font-size:13px;">{{ entry.created_at }}</td>
+      <td>
+        {% if entry.action == 'create' %}<span style="color:var(--success);font-weight:600;">Создание</span>
+        {% elif entry.action == 'update' %}<span style="color:#0066cc;font-weight:600;">Изменение</span>
+        {% elif entry.action == 'delete' %}<span style="color:var(--danger);font-weight:600;">Удаление</span>
+        {% else %}{{ entry.action }}{% endif %}
+      </td>
+      <td>{{ entry.entity }}</td>
+      <td><span class="badge-id">#{{ entry.entity_id or '—' }}</span></td>
+      <td style="color:var(--text-muted);font-size:13px;">{{ entry.details or '—' }}</td>
+    </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  <div class="empty-state">
+    <div class="empty-icon">📋</div>
+    <p>Журнал пуст</p>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

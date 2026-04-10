@@ -27,13 +27,13 @@
     </tr></thead>
     <tbody>
     {% for act in acts %}
-    <tr>
+    <tr onclick="window.location='/acts/{{ act.id }}'" style="cursor:pointer;">
       <td><span class="badge-id">#{{ act.id }}</span></td>
       <td>{{ act.act_date }}</td>
-      <td><a href="/acts/{{ act.id }}">{{ act.car_info }}</a></td>
+      <td>{{ act.car_info }}</td>
       <td>{{ act.driver_name or '—' }}</td>
       <td class="amount-col">{{ "%.2f"|format(act.total_amount) }}</td>
-      <td>
+      <td onclick="event.stopPropagation()">
         <a href="/acts/{{ act.id }}/edit" class="btn-ghost btn-sm">
           <i class="bi bi-pencil"></i>
         </a>

@@ -1,0 +1,116 @@
+{% extends "base.html" %}
+{% block title %}Акт #{{ act.id }}{% endblock %}
+{% block page_title %}Акт #{{ act.id }}{% endblock %}
+{% block topbar_actions %}
+<div style="display:flex;gap:10px;">
+  <a href="/acts" class="btn-ghost"><i class="bi bi-arrow-left"></i> Назад</a>
+  <a href="/acts/{{ act.id }}/edit" class="btn-ghost"><i class="bi bi-pencil"></i> Редактировать</a>
+  <button class="btn-ghost btn-sm" onclick="window.print()">
+    <i class="bi bi-printer"></i> Печать
+  </button>
+  <button class="btn-ghost btn-sm" style="opacity:.5;cursor:not-allowed;" title="Экспорт в разработке">
+    <i class="bi bi-file-earmark-arrow-down"></i> Экспорт
+  </button>
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="card" style="margin-bottom:20px;">
+  <div class="card-header"><span class="card-header-title">Реквизиты</span></div>
+  <div class="card-body">
+    <div class="detail-header">
+      <div class="detail-field">
+        <label>Дата акта</label>
+        <span>{{ act.act_date }}</span>
+      </div>
+      <div class="detail-field">
+        <label>Машина</label>
+        <span>{{ act.car_info }}</span>
+      </div>
+      <div class="detail-field">
+        <label>ФИО водителя</label>
+        <span>{{ act.driver_name or '—' }}</span>
+      </div>
+      <div class="detail-field">
+        <label>Телефон водителя</label>
+        <span>{{ act.driver_phone or '—' }}</span>
+      </div>
+      <div class="detail-field">
+        <label>Телефон шефа</label>
+        <span>{{ act.boss_phone or '—' }}</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+{% if act.parts %}
+<div class="card" style="margin-bottom:20px;">
+  <div class="card-header"><span class="card-header-title">Запчасти</span></div>
+  <div style="overflow-x:auto;">
+    <table class="act-table">
+      <thead><tr>
+        <th class="col-num">№</th>
+        <th class="col-name">Наименование</th>
+        <th class="col-price">Цена</th>
+        <th class="col-qty">Кол-во</th>
+        <th class="col-amount">Сумма</th>
+      </tr></thead>
+      <tbody>
+      {% for p in act.parts %}
+      <tr>
+        <td>{{ p.position }}</td>
+        <td>{{ p.name }}</td>
+        <td>{{ "%.2f"|format(p.price) }}</td>
+        <td>{{ p.quantity }}</td>
+        <td class="amount-cell">{{ "%.2f"|format(p.amount) }}</td>
+      </tr>
+      {% endfor %}
+      </tbody>
+      <tfoot><tr>
+        <td colspan="4" class="total-label">Итого по запчастям</td>
+        <td class="total-value">{{ "%.2f"|format(act.parts|sum(attribute='amount')) }}</td>
+      </tr></tfoot>
+    </table>
+  </div>
+</div>
+{% endif %}
+
+{% if act.works %}
+<div class="card" style="margin-bottom:20px;">
+  <div class="card-header"><span class="card-header-title">Работы</span></div>
+  <div style="overflow-x:auto;">
+    <table class="act-table">
+      <thead><tr>
+        <th class="col-num">№</th>
+        <th class="col-name">Наименование</th>
+        <th class="col-price">Цена</th>
+        <th class="col-qty">Кол-во</th>
+        <th class="col-amount">Сумма</th>
+      </tr></thead>
+      <tbody>
+      {% for w in act.works %}
+      <tr>
+        <td>{{ w.position }}</td>
+        <td>{{ w.name }}</td>
+        <td>{{ "%.2f"|format(w.price) }}</td>
+        <td>{{ w.quantity }}</td>
+        <td class="amount-cell">{{ "%.2f"|format(w.amount) }}</td>
+      </tr>
+      {% endfor %}
+      </tbody>
+      <tfoot><tr>
+        <td colspan="4" class="total-label">Итого по работам</td>
+        <td class="total-value">{{ "%.2f"|format(act.works|sum(attribute='amount')) }}</td>
+      </tr></tfoot>
+    </table>
+  </div>
+</div>
+{% endif %}
+
+<div class="card">
+  <div class="grand-total">
+    <span class="grand-total-label">ИТОГО К ОПЛАТЕ</span>
+    <span class="grand-total-value">{{ "%.2f"|format(act.total_amount) }}</span>
+  </div>
+</div>
+{% endblock %}

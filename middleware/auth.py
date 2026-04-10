@@ -6,7 +6,7 @@ PUBLIC = {"/login", "/logout"}
 ADMIN_PREFIX = "/admin"
 
 # set to True during development to skip login requirement
-AUTH_DISABLED = True
+AUTH_DISABLED = False
 
 
 class AuthMiddleware(BaseHTTPMiddleware):

@@ -39,7 +39,12 @@ async def act_edit_page(request: Request, act_id: int):
     act = crud.get_act(act_id)
     if act is None:
         raise NotFoundError("Акт не найден")
-    return templates.TemplateResponse(request, "acts/edit.html", {"act": act})
+    # serialize to dicts so tojson filter works in template
+    return templates.TemplateResponse(request, "acts/edit.html", {
+        "act": act,
+        "parts_json": [p.model_dump() for p in act.parts],
+        "works_json": [w.model_dump() for w in act.works],
+    })
 
 
 # --- export placeholder (v2) ----------------------------------------------
