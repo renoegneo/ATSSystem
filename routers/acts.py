@@ -1,13 +1,12 @@
-from fastapi import APIRouter, Request, Depends
-from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse
+from fastapi import APIRouter, Request
+from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.templating import Jinja2Templates
 from pathlib import Path
 from models import ActIn
 from exceptions import NotFoundError
-from middleware.auth import require_user
 import crud
 
-router = APIRouter(prefix="/acts", dependencies=[Depends(require_user)])
+router = APIRouter(prefix="/acts")
 templates = Jinja2Templates(directory=Path(__file__).parent.parent / "templates")
 
 

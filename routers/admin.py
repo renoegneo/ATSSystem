@@ -1,15 +1,14 @@
-from fastapi import APIRouter, Request, Depends
-from fastapi.responses import HTMLResponse, JSONResponse, RedirectResponse
+from fastapi import APIRouter, Request
+from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.templating import Jinja2Templates
 from pathlib import Path
 from models import ChangePasswordIn
 from exceptions import NotFoundError
 from config import verify_password, hash_password
-from middleware.auth import require_admin
 import crud
 import config
 
-router = APIRouter(prefix="/admin", dependencies=[Depends(require_admin)])
+router = APIRouter(prefix="/admin")
 templates = Jinja2Templates(directory=Path(__file__).parent.parent / "templates")
 
 

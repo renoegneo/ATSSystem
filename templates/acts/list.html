@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+{% block title %}Акты{% endblock %}
+{% block page_title %}Акты{% endblock %}
+{% block topbar_actions %}
+<a href="/acts/new" class="btn-accent"><i class="bi bi-plus-lg"></i> Новый акт</a>
+{% endblock %}
+
+{% block content %}
+<div class="card">
+  <div class="card-header">
+    <span class="card-header-title">Все акты</span>
+    <div class="search-bar">
+      <i class="bi bi-search search-icon"></i>
+      <input type="text" class="form-control" id="searchInput" placeholder="Поиск по машине, водителю, дате..." value="{{ query }}">
+    </div>
+  </div>
+
+  {% if acts %}
+  <table class="acts-table">
+    <thead><tr>
+      <th>№</th>
+      <th>Дата</th>
+      <th>Машина</th>
+      <th>Водитель</th>
+      <th>Сумма</th>
+      <th></th>
+    </tr></thead>
+    <tbody>
+    {% for act in acts %}
+    <tr>
+      <td><span class="badge-id">#{{ act.id }}</span></td>
+      <td>{{ act.act_date }}</td>
+      <td><a href="/acts/{{ act.id }}">{{ act.car_info }}</a></td>
+      <td>{{ act.driver_name or '—' }}</td>
+      <td class="amount-col">{{ "%.2f"|format(act.total_amount) }}</td>
+      <td>
+        <a href="/acts/{{ act.id }}/edit" class="btn-ghost btn-sm">
+          <i class="bi bi-pencil"></i>
+        </a>
+      </td>
+    </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  {% else %}
+  <div class="empty-state">
+    <div class="empty-icon">📋</div>
+    <p>{% if query %}Ничего не найдено по запросу «{{ query }}»{% else %}Актов пока нет. Создайте первый!{% endif %}</p>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+// live search with debounce
+let searchTimer;
+document.getElementById('searchInput').addEventListener('input', (e) => {
+  clearTimeout(searchTimer);
+  searchTimer = setTimeout(() => {
+    const q = e.target.value.trim();
+    window.location.href = q ? `/acts?q=${encodeURIComponent(q)}` : '/acts';
+  }, 400);
+});
+</script>
+{% endblock %}

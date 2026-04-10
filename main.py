@@ -2,17 +2,18 @@ from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import RedirectResponse
 from starlette.middleware.sessions import SessionMiddleware
+from starlette.middleware.base import BaseHTTPMiddleware
 from contextlib import asynccontextmanager
 from pathlib import Path
 import os
 
 from database import init_db
 from exceptions import register_exception_handlers
+from middleware.auth import AuthMiddleware
 from routers import acts, auth, admin
 from config import SESSION_SECRET, SESSION_MAX_AGE, HOST, PORT
 
 DEV_MODE = os.getenv("DEV", "0") == "1"
-# DEV_MODE = True  # for development, set to False in production
 
 
 @asynccontextmanager
@@ -28,8 +29,9 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
-# --- middleware -----------------------------------------------------------
-# only SessionMiddleware needed — auth is handled via router dependencies
+# SessionMiddleware must be added LAST so it runs FIRST in the stack
+# Starlette applies middleware in reverse order of add_middleware calls
+app.add_middleware(AuthMiddleware)
 app.add_middleware(SessionMiddleware, secret_key=SESSION_SECRET, max_age=SESSION_MAX_AGE)
 
 # --- static files ---------------------------------------------------------
@@ -44,13 +46,11 @@ app.include_router(admin.router)
 register_exception_handlers(app)
 
 
-# --- root redirect --------------------------------------------------------
 @app.get("/")
 async def root():
     return RedirectResponse(url="/acts", status_code=302)
 
 
-# --- run ------------------------------------------------------------------
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run("main:app", host=HOST, port=PORT, reload=False)

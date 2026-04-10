@@ -1,0 +1,124 @@
+{% extends "base.html" %}
+{% block title %}Редактирование акта #{{ act.id }}{% endblock %}
+{% block page_title %}Редактирование акта #{{ act.id }}{% endblock %}
+{% block topbar_actions %}
+<a href="/acts/{{ act.id }}" class="btn-ghost"><i class="bi bi-arrow-left"></i> Назад</a>
+{% endblock %}
+
+{% block content %}
+<div class="error-list" id="errorList"><ul></ul></div>
+
+<form id="actForm">
+  <div class="card" style="margin-bottom:20px;">
+    <div class="card-header"><span class="card-header-title">Реквизиты</span></div>
+    <div class="card-body">
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;">
+        <div>
+          <label class="form-label">Дата акта <span style="color:var(--danger)">*</span></label>
+          <input type="date" name="act_date" id="actDate" class="form-control" value="{{ act.act_date }}" required>
+        </div>
+        <div>
+          <label class="form-label">Марка и номер машины <span style="color:var(--danger)">*</span></label>
+          <input type="text" name="car_info" id="carInfo" class="form-control" value="{{ act.car_info }}" required>
+        </div>
+        <div>
+          <label class="form-label">ФИО водителя</label>
+          <input type="text" name="driver_name" id="driverName" class="form-control" value="{{ act.driver_name or '' }}">
+        </div>
+        <div>
+          <label class="form-label">Телефон водителя</label>
+          <input type="text" name="driver_phone" id="driverPhone" class="form-control" value="{{ act.driver_phone or '' }}">
+        </div>
+        <div>
+          <label class="form-label">Телефон шефа</label>
+          <input type="text" name="boss_phone" id="bossPhone" class="form-control" value="{{ act.boss_phone or '' }}">
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card" style="margin-bottom:20px;">
+    <div class="card-header">
+      <span class="card-header-title">Запчасти</span>
+      <button type="button" class="btn-ghost btn-sm" onclick="addRow('parts')"><i class="bi bi-plus"></i> Добавить</button>
+    </div>
+    <div style="overflow-x:auto;">
+      <table class="act-table">
+        <thead><tr>
+          <th class="col-num">№</th>
+          <th class="col-name">Наименование <span style="color:var(--danger)">*</span></th>
+          <th class="col-price">Цена <span style="color:var(--danger)">*</span></th>
+          <th class="col-qty">Кол-во</th>
+          <th class="col-amount">Сумма</th>
+          <th style="width:36px;"></th>
+        </tr></thead>
+        <tbody id="partsTbody"></tbody>
+        <tfoot><tr>
+          <td colspan="4" class="total-label">Итого по запчастям</td>
+          <td class="total-value" id="partsTotalCell">0</td>
+          <td></td>
+        </tr></tfoot>
+      </table>
+    </div>
+  </div>
+
+  <div class="card" style="margin-bottom:20px;">
+    <div class="card-header">
+      <span class="card-header-title">Работы</span>
+      <button type="button" class="btn-ghost btn-sm" onclick="addRow('works')"><i class="bi bi-plus"></i> Добавить</button>
+    </div>
+    <div style="overflow-x:auto;">
+      <table class="act-table">
+        <thead><tr>
+          <th class="col-num">№</th>
+          <th class="col-name">Наименование <span style="color:var(--danger)">*</span></th>
+          <th class="col-price">Цена <span style="color:var(--danger)">*</span></th>
+          <th class="col-qty">Кол-во</th>
+          <th class="col-amount">Сумма</th>
+          <th style="width:36px;"></th>
+        </tr></thead>
+        <tbody id="worksTbody"></tbody>
+        <tfoot><tr>
+          <td colspan="4" class="total-label">Итого по работам</td>
+          <td class="total-value" id="worksTotalCell">0</td>
+          <td></td>
+        </tr></tfoot>
+      </table>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="grand-total">
+      <span class="grand-total-label">ИТОГО К ОПЛАТЕ</span>
+      <span class="grand-total-value" id="grandTotal">0</span>
+    </div>
+    <div style="padding:0 24px 24px;display:flex;gap:12px;justify-content:flex-end;">
+      <a href="/acts/{{ act.id }}" class="btn-ghost">Отмена</a>
+      <button type="submit" class="btn-accent" id="submitBtn">
+        <i class="bi bi-check-lg"></i> Сохранить изменения
+      </button>
+    </div>
+  </div>
+</form>
+{% endblock %}
+
+{% block scripts %}
+<script src="/static/js/act-form.js"></script>
+<script>
+  const ACT_ID = {{ act.id }};
+  const existingParts = {{ act.parts | tojson }};
+  const existingWorks = {{ act.works | tojson }};
+
+  // fill existing rows — no draft on edit page
+  if (existingParts.length) existingParts.forEach(r => addRow('parts', r));
+  else addRow('parts');
+
+  if (existingWorks.length) existingWorks.forEach(r => addRow('works', r));
+  else addRow('works');
+
+  document.getElementById('actForm').addEventListener('submit', (e) => {
+    e.preventDefault();
+    submitUpdate(ACT_ID);
+  });
+</script>
+{% endblock %}

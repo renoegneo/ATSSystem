@@ -1,35 +1,34 @@
-from fastapi import Request, Depends
+from fastapi import Request
 from fastapi.responses import RedirectResponse
+from starlette.middleware.base import BaseHTTPMiddleware
 
-# routes that don't require any auth
-PUBLIC_ROUTES = {"/login", "/logout"}
-
-# prefix that requires admin role
+PUBLIC = {"/login", "/logout"}
 ADMIN_PREFIX = "/admin"
 
-
-def get_role(request: Request) -> str | None:
-    return request.session.get("role")
-
-
-def require_user(request: Request):
-    # used as a dependency on routers — redirects to login if not authenticated
-    if request.url.path in PUBLIC_ROUTES:
-        return
-    role = request.session.get("role")
-    if role is None:
-        return RedirectResponse(url="/login", status_code=302)
-    return role
+# set to True during development to skip login requirement
+AUTH_DISABLED = True
 
 
-def require_admin(request: Request):
-    role = request.session.get("role")
-    if role != "admin":
-        return RedirectResponse(url="/login", status_code=302)
-    return role
+class AuthMiddleware(BaseHTTPMiddleware):
+    async def dispatch(self, request: Request, call_next):
+        path = request.url.path
 
-# def require_user(request: Request):
-#     return "user"  # temporarily bypassing auth for development
+        # always pass through static files and login/logout
+        if path.startswith("/static") or path in PUBLIC:
+            return await call_next(request)
 
-# def require_admin(request: Request):
-#     return "admin"  # temporarily bypassing auth for development
+        if AUTH_DISABLED:
+            # block admin routes even in dev mode
+            if path.startswith(ADMIN_PREFIX):
+                return RedirectResponse(url="/login", status_code=302)
+            return await call_next(request)
+
+        role = request.session.get("role")
+
+        if role is None:
+            return RedirectResponse(url="/login", status_code=302)
+
+        if path.startswith(ADMIN_PREFIX) and role != "admin":
+            return RedirectResponse(url="/login", status_code=302)
+
+        return await call_next(request)

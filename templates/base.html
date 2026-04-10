@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}Автосервис{% endblock %}</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap-icons/1.11.3/font/bootstrap-icons.min.css">
+  <link rel="stylesheet" href="/static/css/main.css">
+  {% block head %}{% endblock %}
+</head>
+<body>
+<div class="layout">
+  <aside class="sidebar">
+    <div class="sidebar-brand">
+      <span class="brand">Автосервис</span>
+      <span class="sub">Система учёта</span>
+    </div>
+    <nav class="sidebar-nav">
+      <a href="/acts" class="{% if request.url.path.startswith('/acts') and request.url.path != '/acts/new' %}active{% endif %}">
+        <span class="nav-icon"><i class="bi bi-file-text"></i></span> Акты
+      </a>
+      <a href="/acts/new" class="{% if request.url.path == '/acts/new' %}active{% endif %}">
+        <span class="nav-icon"><i class="bi bi-plus-circle"></i></span> Новый акт
+      </a>
+      {% if request.session.get('role') == 'admin' %}
+      <div style="margin:12px 20px 6px;font-size:11px;text-transform:uppercase;letter-spacing:.07em;color:rgba(255,255,255,.25);font-weight:600;">Администратор</div>
+      <a href="/admin" class="{% if request.url.path == '/admin' %}active{% endif %}">
+        <span class="nav-icon"><i class="bi bi-speedometer2"></i></span> Панель
+      </a>
+      <a href="/admin/acts" class="{% if request.url.path == '/admin/acts' %}active{% endif %}">
+        <span class="nav-icon"><i class="bi bi-table"></i></span> Все акты
+      </a>
+      <a href="/admin/stats" class="{% if request.url.path == '/admin/stats' %}active{% endif %}">
+        <span class="nav-icon"><i class="bi bi-bar-chart"></i></span> Статистика
+      </a>
+      <a href="/admin/audit" class="{% if request.url.path == '/admin/audit' %}active{% endif %}">
+        <span class="nav-icon"><i class="bi bi-journal-text"></i></span> Журнал
+      </a>
+      <a href="/admin/settings" class="{% if request.url.path == '/admin/settings' %}active{% endif %}">
+        <span class="nav-icon"><i class="bi bi-gear"></i></span> Настройки
+      </a>
+      {% endif %}
+    </nav>
+    <div class="sidebar-footer">
+      <a href="/logout"><i class="bi bi-box-arrow-left"></i> Выйти</a>
+    </div>
+  </aside>
+
+  <div class="main">
+    <header class="topbar">
+      <h1 class="topbar-title">{% block page_title %}{% endblock %}</h1>
+      <div>{% block topbar_actions %}{% endblock %}</div>
+    </header>
+    <div class="page-body">
+      {% block content %}{% endblock %}
+    </div>
+  </div>
+</div>
+
+<div class="toast-container" id="toastContainer"></div>
+
+<div class="modal-backdrop-custom" id="confirmModal">
+  <div class="modal-box">
+    <div class="modal-title" id="confirmTitle">Подтверждение</div>
+    <div class="modal-text" id="confirmText"></div>
+    <div class="modal-actions">
+      <button class="btn-ghost" onclick="closeConfirm()">Отмена</button>
+      <button class="btn-danger" id="confirmBtn">Удалить</button>
+    </div>
+  </div>
+</div>
+
+<script src="/static/js/utils.js"></script>
+{% block scripts %}{% endblock %}
+</body>
+</html>
